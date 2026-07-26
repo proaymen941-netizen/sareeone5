@@ -122,6 +122,8 @@ export default function AdminRestaurants() {
         minimumOrder: parseFloat(data.minimumOrder) || 0,
         latitude: data.latitude ? parseFloat(data.latitude) : null,
         longitude: data.longitude ? parseFloat(data.longitude) : null,
+        categoryId: data.categoryId || null,
+        temporaryCloseReason: data.isTemporarilyClosed ? (data.temporaryCloseReason || null) : null,
       };
       const response = await apiRequest('POST', '/api/admin/restaurants', submitData);
       return response.json();
@@ -135,16 +137,25 @@ export default function AdminRestaurants() {
       resetForm();
       setIsDialogOpen(false);
     },
+    onError: (error: any) => {
+      toast({
+        title: "خطأ في إضافة المتجر",
+        description: error?.message || "تعذر إضافة المتجر",
+        variant: "destructive",
+      });
+    }
   });
 
   const updateRestaurantMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<typeof formData> }) => {
       const submitData = {
         ...data,
-        commissionRate: data.commissionRate != null ? parseFloat(data.commissionRate) : undefined,
-        minimumOrder: data.minimumOrder != null ? parseFloat(data.minimumOrder) : undefined,
-        latitude: data.latitude === '' ? null : data.latitude != null ? parseFloat(data.latitude) : undefined,
-        longitude: data.longitude === '' ? null : data.longitude != null ? parseFloat(data.longitude) : undefined,
+        commissionRate: data.commissionRate != null && data.commissionRate !== '' ? parseFloat(data.commissionRate) : undefined,
+        minimumOrder: data.minimumOrder != null && data.minimumOrder !== '' ? parseFloat(data.minimumOrder) : undefined,
+        latitude: data.latitude === '' || data.latitude == null ? null : parseFloat(data.latitude),
+        longitude: data.longitude === '' || data.longitude == null ? null : parseFloat(data.longitude),
+        categoryId: data.categoryId || null,
+        temporaryCloseReason: data.isTemporarilyClosed ? (data.temporaryCloseReason || null) : null,
       };
       const response = await apiRequest('PUT', `/api/admin/restaurants/${id}`, submitData);
       return response.json();
@@ -159,6 +170,13 @@ export default function AdminRestaurants() {
       setEditingRestaurant(null);
       setIsDialogOpen(false);
     },
+    onError: (error: any) => {
+      toast({
+        title: "خطأ في تحديث المتجر",
+        description: error?.message || "تعذر تحديث بيانات المتجر",
+        variant: "destructive",
+      });
+    }
   });
 
   const deleteRestaurantMutation = useMutation({
@@ -205,22 +223,22 @@ export default function AdminRestaurants() {
   const handleEdit = (restaurant: Restaurant) => {
     setEditingRestaurant(restaurant);
     setFormData({
-      name: restaurant.name,
+      name: restaurant.name || '',
       description: restaurant.description || '',
       phone: restaurant.phone || '',
-      image: restaurant.image,
-      deliveryTime: restaurant.deliveryTime,
-      commissionRate: restaurant.commissionRate || '10',
-      minimumOrder: restaurant.minimumOrder || '0',
-      isOpen: restaurant.isOpen,
+      image: restaurant.image || '',
+      deliveryTime: restaurant.deliveryTime || '30-45 دقيقة',
+      commissionRate: restaurant.commissionRate ? String(restaurant.commissionRate) : '10',
+      minimumOrder: restaurant.minimumOrder ? String(restaurant.minimumOrder) : '0',
+      isOpen: restaurant.isOpen !== false,
       categoryId: restaurant.categoryId || '',
       openingTime: restaurant.openingTime || '08:00',
       closingTime: restaurant.closingTime || '23:00',
       workingDays: restaurant.workingDays || '0,1,2,3,4,5,6',
       isTemporarilyClosed: restaurant.isTemporarilyClosed || false,
       temporaryCloseReason: restaurant.temporaryCloseReason || '',
-      latitude: restaurant.latitude || '',
-      longitude: restaurant.longitude || '',
+      latitude: restaurant.latitude ? String(restaurant.latitude) : '',
+      longitude: restaurant.longitude ? String(restaurant.longitude) : '',
       address: restaurant.address || '',
       isFeatured: restaurant.isFeatured || false,
       isNew: restaurant.isNew || false,

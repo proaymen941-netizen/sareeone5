@@ -924,23 +924,32 @@ export class MemStorage implements IStorage {
     
     const updates: Partial<Restaurant> = {};
     
+    if (restaurant.name !== undefined) updates.name = restaurant.name;
+    if (restaurant.description !== undefined) updates.description = restaurant.description ?? null;
+    if (restaurant.image !== undefined) updates.image = restaurant.image;
     if (restaurant.phone !== undefined) updates.phone = restaurant.phone ?? null;
+    if (restaurant.rating !== undefined) updates.rating = restaurant.rating ?? "0.0";
+    if (restaurant.reviewCount !== undefined) updates.reviewCount = restaurant.reviewCount ?? 0;
+    if (restaurant.deliveryTime !== undefined) updates.deliveryTime = restaurant.deliveryTime;
+    if (restaurant.isOpen !== undefined) updates.isOpen = restaurant.isOpen;
+    if (restaurant.minimumOrder !== undefined) updates.minimumOrder = restaurant.minimumOrder?.toString() ?? "0";
+    if (restaurant.deliveryFee !== undefined) updates.deliveryFee = restaurant.deliveryFee?.toString() ?? "0";
+    if (restaurant.perKmFee !== undefined) updates.perKmFee = restaurant.perKmFee?.toString() ?? "0";
+    if (restaurant.commissionRate !== undefined) updates.commissionRate = restaurant.commissionRate?.toString() ?? "0";
+    if (restaurant.categoryId !== undefined) updates.categoryId = restaurant.categoryId ?? null;
     if (restaurant.openingTime !== undefined) updates.openingTime = restaurant.openingTime ?? null;
     if (restaurant.closingTime !== undefined) updates.closingTime = restaurant.closingTime ?? null;
     if (restaurant.workingDays !== undefined) updates.workingDays = restaurant.workingDays ?? null;
     if (restaurant.isTemporarilyClosed !== undefined) updates.isTemporarilyClosed = restaurant.isTemporarilyClosed;
     if (restaurant.temporaryCloseReason !== undefined) updates.temporaryCloseReason = restaurant.temporaryCloseReason ?? null;
+    if (restaurant.latitude !== undefined) updates.latitude = restaurant.latitude?.toString() ?? null;
+    if (restaurant.longitude !== undefined) updates.longitude = restaurant.longitude?.toString() ?? null;
+    if (restaurant.address !== undefined) updates.address = restaurant.address ?? null;
+    if (restaurant.isFeatured !== undefined) updates.isFeatured = restaurant.isFeatured;
+    if (restaurant.isNew !== undefined) updates.isNew = restaurant.isNew;
+    if (restaurant.isActive !== undefined) updates.isActive = restaurant.isActive;
     
-    if (restaurant.name !== undefined) updates.name = restaurant.name;
-    if (restaurant.description !== undefined) updates.description = restaurant.description ?? null;
-    if (restaurant.image !== undefined) updates.image = restaurant.image;
-    if (restaurant.rating !== undefined) updates.rating = restaurant.rating ?? "0.0";
-    if (restaurant.reviewCount !== undefined) updates.reviewCount = restaurant.reviewCount ?? 0;
-    if (restaurant.deliveryTime !== undefined) updates.deliveryTime = restaurant.deliveryTime;
-    if (restaurant.isOpen !== undefined) updates.isOpen = restaurant.isOpen ?? true;
-    if (restaurant.minimumOrder !== undefined) updates.minimumOrder = restaurant.minimumOrder?.toString() ?? "0";
-    if (restaurant.deliveryFee !== undefined) updates.deliveryFee = restaurant.deliveryFee?.toString() ?? "0";
-    if (restaurant.categoryId !== undefined) updates.categoryId = restaurant.categoryId ?? null;
+    updates.updatedAt = new Date();
     
     const updated = { ...existing, ...updates };
     this.restaurants.set(id, updated);
