@@ -373,6 +373,7 @@ export default function AdminUiSettings() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/ui-settings'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/ui-settings'] });
       
       // إرسال تحديث عبر WebSocket لإجبار التطبيقات على تحديث الإعدادات لحظياً
       const ws = (window as any).WS_MANAGER || (globalThis as any).WS_MANAGER;

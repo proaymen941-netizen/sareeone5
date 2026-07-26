@@ -123,11 +123,19 @@ export function UiSettingsProvider({ children }: { children: React.ReactNode }) 
       if (adminToken) {
         headers['Authorization'] = `Bearer ${adminToken}`;
       }
-      const response = await fetch(`/api/admin/ui-settings/${key}`, {
+      let response = await fetch(`/api/admin/ui-settings/${key}`, {
         method: 'PUT',
         headers,
         body: JSON.stringify({ value }),
       });
+
+      if (!response.ok) {
+        response = await fetch(`/api/ui-settings/${key}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ value }),
+        });
+      }
 
       if (response.ok) {
         setSettings(prev => {
@@ -135,6 +143,8 @@ export function UiSettingsProvider({ children }: { children: React.ReactNode }) 
           saveCachedSettings(newSettings);
           return newSettings;
         });
+      } else {
+        console.error('فشل في تحديث الإعداد من السيرفر:', response.status);
       }
     } catch (error) {
       console.error('خطأ في تحديث الإعداد:', error);

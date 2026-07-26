@@ -2060,35 +2060,21 @@ router.put("/business-hours", async (req, res) => {
   try {
     const { opening_time, closing_time, store_status } = req.body;
     
-    const updates = [];
-    
-    if (opening_time) {
-      updates.push(
-        db.update(schema.systemSettings)
-          .set({ value: opening_time, updatedAt: new Date() })
-          .where(eq(schema.systemSettings.key, 'opening_time'))
-      );
+    if (opening_time !== undefined && opening_time !== null) {
+      await storage.updateUiSetting('opening_time', String(opening_time));
+      broadcastSettingsChanged('opening_time');
     }
     
-    if (closing_time) {
-      updates.push(
-        db.update(schema.systemSettings)
-          .set({ value: closing_time, updatedAt: new Date() })
-          .where(eq(schema.systemSettings.key, 'closing_time'))
-      );
+    if (closing_time !== undefined && closing_time !== null) {
+      await storage.updateUiSetting('closing_time', String(closing_time));
+      broadcastSettingsChanged('closing_time');
     }
     
-    if (store_status) {
-      updates.push(
-        db.update(schema.systemSettings)
-          .set({ value: store_status, updatedAt: new Date() })
-          .where(eq(schema.systemSettings.key, 'store_status'))
-      );
+    if (store_status !== undefined && store_status !== null) {
+      await storage.updateUiSetting('store_status', String(store_status));
+      broadcastSettingsChanged('store_status');
     }
     
-    await Promise.all(updates);
-    
-    // بث التحديث عبر WebSocket لمزامنة جميع الأجهزة
     broadcastSettingsChanged('business_hours');
     
     res.json({ success: true, message: "تم تحديث أوقات العمل بنجاح" });

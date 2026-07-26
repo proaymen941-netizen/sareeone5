@@ -213,9 +213,17 @@ export class DatabaseStorage {
     return Array.isArray(result) ? result : [];
   }
 
+  async getAllUsers(): Promise<User[]> {
+    return this.getUsers();
+  }
+
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await this.db.select().from(users).where(eq(users.id, id));
     return user;
+  }
+
+  async getUserById(id: string): Promise<User | undefined> {
+    return this.getUser(id);
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
@@ -708,9 +716,17 @@ export class DatabaseStorage {
     return Array.isArray(result) ? result : [];
   }
 
+  async getAllDrivers(): Promise<Driver[]> {
+    return this.getDrivers();
+  }
+
   async getDriver(id: string): Promise<Driver | undefined> {
     const [driver] = await this.db.select().from(drivers).where(eq(drivers.id, id));
     return driver;
+  }
+
+  async getDriverById(id: string): Promise<Driver | undefined> {
+    return this.getDriver(id);
   }
 
   async getAvailableDrivers(): Promise<Driver[]> {

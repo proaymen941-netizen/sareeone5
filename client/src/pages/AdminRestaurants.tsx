@@ -284,18 +284,12 @@ export default function AdminRestaurants() {
       return;
     }
 
-    // Time validation
+    // Time validation (ensure valid time format)
     if (formData.openingTime && formData.closingTime) {
-      const [openHour, openMin] = formData.openingTime.split(':').map(Number);
-      const [closeHour, closeMin] = formData.closingTime.split(':').map(Number);
-      
-      const openingMinutes = openHour * 60 + openMin;
-      const closingMinutes = closeHour * 60 + closeMin;
-      
-      if (openingMinutes >= closingMinutes) {
+      if (!formData.openingTime.includes(':') || !formData.closingTime.includes(':')) {
         toast({
           title: "خطأ في أوقات العمل",
-          description: "وقت الفتح يجب أن يكون قبل وقت الإغلاق",
+          description: "يرجى أدخال وقت فتح وإغلاق صحيحين",
           variant: "destructive",
         });
         return;

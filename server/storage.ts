@@ -2025,25 +2025,27 @@ function createSmartStorage(): IStorage {
         return undefined;
       }
 
-      const origMethod = target[prop];
-      if (typeof origMethod === 'function') {
+      const dbMethod = target[prop];
+      const memMethod = (mem as any)[prop];
+
+      if (typeof dbMethod === 'function' || typeof memMethod === 'function') {
         return async function (...args: any[]) {
-          if (useDb) {
+          if (useDb && typeof dbMethod === 'function') {
             try {
-              return await origMethod.apply(target, args);
+              return await dbMethod.apply(target, args);
             } catch (err: any) {
               console.warn(`⚠️ DB query '${String(prop)}' failed (${err?.message || err}). Falling back to memory storage.`);
               useDb = false;
-              const memMethod = (mem as any)[prop];
               if (typeof memMethod === 'function') {
                 return await memMethod.apply(mem, args);
               }
             }
-          } else {
-            const memMethod = (mem as any)[prop];
-            if (typeof memMethod === 'function') {
-              return await memMethod.apply(mem, args);
-            }
+          }
+          if (typeof memMethod === 'function') {
+            return await memMethod.apply(mem, args);
+          }
+          if (typeof dbMethod === 'function') {
+            return await dbMethod.apply(target, args);
           }
         };
       }

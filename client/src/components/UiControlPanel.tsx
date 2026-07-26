@@ -83,8 +83,9 @@ export function UiControlPanel() {
     setLocalSettings(prev => ({ ...prev, [key]: value }));
   };
 
-  const handleSaveSetting = (key: string) => {
-    updateSetting(key, localSettings[key] || '');
+  const handleSaveSetting = (key: string, overrideVal?: string) => {
+    const valToSave = overrideVal !== undefined ? overrideVal : (localSettings[key] || '');
+    updateSetting(key, valToSave);
   };
 
   const handleNavigationToggle = (key: string, enabled: boolean) => {
@@ -271,7 +272,7 @@ export function UiControlPanel() {
                     onClick={() => {
                       const val = toggleTimeAmPm(localSettings['opening_time'] || '08:00', 'AM');
                       handleInputChange('opening_time', val);
-                      handleSaveSetting('opening_time');
+                      handleSaveSetting('opening_time', val);
                     }}
                     className="text-xs px-2 py-1 h-7"
                   >
@@ -284,7 +285,7 @@ export function UiControlPanel() {
                     onClick={() => {
                       const val = toggleTimeAmPm(localSettings['opening_time'] || '08:00', 'PM');
                       handleInputChange('opening_time', val);
-                      handleSaveSetting('opening_time');
+                      handleSaveSetting('opening_time', val);
                     }}
                     className="text-xs px-2 py-1 h-7"
                   >
@@ -315,7 +316,7 @@ export function UiControlPanel() {
                     onClick={() => {
                       const val = toggleTimeAmPm(localSettings['closing_time'] || '23:00', 'AM');
                       handleInputChange('closing_time', val);
-                      handleSaveSetting('closing_time');
+                      handleSaveSetting('closing_time', val);
                     }}
                     className="text-xs px-2 py-1 h-7"
                   >
@@ -328,7 +329,7 @@ export function UiControlPanel() {
                     onClick={() => {
                       const val = toggleTimeAmPm(localSettings['closing_time'] || '23:00', 'PM');
                       handleInputChange('closing_time', val);
-                      handleSaveSetting('closing_time');
+                      handleSaveSetting('closing_time', val);
                     }}
                     className="text-xs px-2 py-1 h-7"
                   >

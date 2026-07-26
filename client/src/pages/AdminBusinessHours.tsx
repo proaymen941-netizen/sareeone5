@@ -55,14 +55,11 @@ export default function AdminBusinessHours() {
   // تحديث أوقات العمل
   const updateBusinessHours = useMutation({
     mutationFn: async (data: BusinessHoursSettings) => {
-      // Update each setting individually
-      const updates = [
-        apiRequest('PUT', `/api/ui-settings/opening_time`, { value: data.opening_time }),
-        apiRequest('PUT', `/api/ui-settings/closing_time`, { value: data.closing_time }),
-        apiRequest('PUT', `/api/ui-settings/store_status`, { value: data.store_status })
-      ];
-      
-      await Promise.all(updates);
+      await apiRequest('PUT', `/api/admin/business-hours`, {
+        opening_time: data.opening_time,
+        closing_time: data.closing_time,
+        store_status: data.store_status
+      });
     },
     onSuccess: () => {
       toast({
@@ -70,6 +67,7 @@ export default function AdminBusinessHours() {
         description: "تم تحديث أوقات العمل بنجاح",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/ui-settings'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/ui-settings'] });
     },
     onError: (error) => {
       console.error('خطأ في تحديث أوقات العمل:', error);
