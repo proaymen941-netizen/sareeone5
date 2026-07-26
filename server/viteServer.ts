@@ -4,9 +4,6 @@ import fs from "fs";
 import path from "path";
 import { type Server } from "http";
 import { nanoid } from "nanoid";
-import { fileURLToPath } from "url";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
@@ -21,6 +18,7 @@ export function log(message: string, source = "express") {
 export async function setupVite(app: Express, server: Server) {
   // Dynamic import — لا يُحمَّل في الإنتاج
   const vite = await import("vite");
+  const rootDir = process.cwd();
 
   const serverOptions = {
     middlewareMode: true,
@@ -32,10 +30,10 @@ export async function setupVite(app: Express, server: Server) {
   };
 
   const viteServer = await vite.createServer({
-    configFile: path.resolve(__dirname, "..", "vite.config.ts"),
+    configFile: path.resolve(rootDir, "vite.config.ts"),
     server: serverOptions,
     appType: "custom",
-    root: path.resolve(__dirname, "..", "client"),
+    root: path.resolve(rootDir, "client"),
   });
 
   app.use(viteServer.middlewares);
@@ -44,8 +42,8 @@ export async function setupVite(app: Express, server: Server) {
     try {
       // Try client/index.html first, then root index.html
       let clientTemplate: string;
-      const clientIndexPath = path.resolve(__dirname, "..", "client", "index.html");
-      const rootIndexPath = path.resolve(__dirname, "..", "index.html");
+      const clientIndexPath = path.resolve(rootDir, "client", "index.html");
+      const rootIndexPath = path.resolve(rootDir, "index.html");
       if (fs.existsSync(clientIndexPath)) {
         clientTemplate = clientIndexPath;
       } else {
@@ -66,8 +64,11 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  // في الإنتاج، الملفات في dist/public (نسبة إلى dist/index.js)
-  const distPath = path.resolve(__dirname, "public");
+  const rootDir = process.cwd();
+  // في الإنتاج، الملفات في dist/public
+  const distPath = fs.existsSync(path.resolve(rootDir, "dist", "public"))
+    ? path.resolve(rootDir, "dist", "public")
+    : path.resolve(rootDir, "public");
 
   if (!fs.existsSync(distPath)) {
     console.error(`Build directory not found: ${distPath}`);

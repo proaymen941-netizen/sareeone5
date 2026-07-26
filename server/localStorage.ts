@@ -1,9 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const UPLOADS_DIR = path.resolve(__dirname, '..', 'uploads');
+const UPLOADS_DIR = path.resolve(process.cwd(), 'uploads');
 
 export const STORAGE_BUCKETS = {
   restaurants: 'restaurants',

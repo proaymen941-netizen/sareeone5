@@ -2,7 +2,7 @@ import type { Express } from "express";
 import express from "express";
 import { createServer, type Server } from "http";
 import path from "path";
-import { fileURLToPath } from "url";
+import fs from "fs";
 import { storage } from "./storage";
 import { dbStorage } from "./db";
 import { log } from "./viteServer";
@@ -21,7 +21,6 @@ import wasalniRouter from "./routes/wasalni";
 import imageUploadRouter from "./imageUpload";
 import { ensureUploadsDir, UPLOADS_DIR } from "./localStorage";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 import { 
   insertRestaurantSchema, 
   insertMenuItemSchema, 
@@ -56,10 +55,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ✅ Serve TWA Digital Asset Links (.well-known) so the Android wrapper
   // verifies ownership and hides the browser top URL bar.
-  app.get('/.well-known/assetlinks.json', (_req, res) => {
+  app.get(['/.well-known/assetlinks.json', '/well-known/assetlinks.json'], (_req, res) => {
     try {
-      const filePath = path.resolve(import.meta.dirname, '..', 'client', 'public', 'well-known', 'assetlinks.json');
-      res.type('application/json').sendFile(filePath);
+      const rootDir = process.cwd();
+      const candidates = [
+        path.resolve(rootDir, 'client', 'public', '.well-known', 'assetlinks.json'),
+        path.resolve(rootDir, 'client', 'public', 'well-known', 'assetlinks.json'),
+        path.resolve(rootDir, 'dist', 'public', '.well-known', 'assetlinks.json'),
+        path.resolve(rootDir, 'dist', 'public', 'well-known', 'assetlinks.json')
+      ];
+      const filePath = candidates.find(p => fs.existsSync(p));
+      if (filePath) {
+        res.type('application/json').sendFile(filePath);
+      } else {
+        res.status(404).json({ error: 'assetlinks.json not found' });
+      }
     } catch (err) {
       res.status(404).json({ error: 'assetlinks.json not found' });
     }
