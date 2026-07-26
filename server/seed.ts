@@ -17,6 +17,7 @@ const defaultUiSettings = [
   { key: "bottom_bar_enabled", value: "true", category: "navigation", description: "إظهار شريط التنقل السفلي" },
   // إعدادات عامة
   { key: "app_name", value: "السريع ون", category: "general", description: "اسم التطبيق" },
+  { key: "app_subtitle", value: "السريع ون", category: "general", description: "الوصف الفرعي أسفل اسم التطبيق" },
   { key: "app_theme", value: "#ec3714", category: "general", description: "اللون الأساسي للتطبيق (hex)" },
   { key: "delivery_fee_default", value: "5", category: "general", description: "رسوم التوصيل الافتراضية (ريال)" },
   { key: "minimum_order_default", value: "25", category: "general", description: "الحد الأدنى لقيمة الطلب (ريال)" },

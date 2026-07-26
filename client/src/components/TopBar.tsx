@@ -121,6 +121,7 @@ export const TopBar: React.FC = () => {
 
   const logoUrl = getSetting('header_logo_url') || getSetting('logo_url') || waselLogo;
   const appName = getSetting('app_name') || 'السريع ون';
+  const appSubtitle = getSetting('app_subtitle') || 'السريع ون';
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -169,7 +170,7 @@ export const TopBar: React.FC = () => {
             </div>
             <div className="flex flex-col leading-none">
               <span className="text-2xl font-black text-white tracking-tight">{appName}</span>
-              <span className="text-[10px] font-bold text-white/80 tracking-[0.3em] mt-1">السريع ون</span>
+              <span className="text-[10px] font-bold text-white/80 tracking-[0.3em] mt-1">{appSubtitle}</span>
             </div>
           </div>
 
@@ -252,7 +253,7 @@ export const TopBar: React.FC = () => {
               </div>
               <div className="flex flex-col leading-none">
                 <span className="text-white font-black text-base">{appName}</span>
-                <span className="text-[8px] font-bold text-white/80 tracking-[0.25em] mt-0.5">السريع ون</span>
+                <span className="text-[8px] font-bold text-white/80 tracking-[0.25em] mt-0.5">{appSubtitle}</span>
               </div>
             </div>
           </div>

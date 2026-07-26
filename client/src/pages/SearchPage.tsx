@@ -125,7 +125,7 @@ export default function SearchPage() {
                 {filteredMenuItems.length > 0 && (
                   <div>
                     {selectedTab === 'all' && <h2 className="text-md font-semibold mb-3 mt-8">المنتجات</h2>}
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-5">
                       {filteredMenuItems.map((item) => (
                         <MenuItemCard 
                           key={item.id} 

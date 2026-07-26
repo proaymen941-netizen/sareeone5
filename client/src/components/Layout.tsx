@@ -64,6 +64,7 @@ export default function Layout({ children }: LayoutProps) {
   const headerLogoUrl = getS('header_logo_url', '');
   const sidebarLogoUrl = getS('sidebar_logo_url', '') || headerLogoUrl;
   const appName = getS('app_name', 'السريع ون');
+  const appSubtitle = getS('app_subtitle', 'السريع ون');
   const appVersion = getS('app_version', '1.0.0');
   const sidebarTagline = getS('sidebar_tagline', 'خدمة التوصيل الأسرع في المملكة');
   const supportTitle = getS('text_support_title', 'نحن معك..');
@@ -163,7 +164,7 @@ export default function Layout({ children }: LayoutProps) {
               </div>
               <div className="flex flex-col leading-none">
                 <span className="text-3xl font-black text-white tracking-tight">{appName}</span>
-                <span className="text-[10px] font-bold text-white/80 tracking-[0.35em] mt-1">السريع ون</span>
+                <span className="text-[10px] font-bold text-white/80 tracking-[0.35em] mt-1">{appSubtitle}</span>
               </div>
             </div>
 
@@ -433,12 +434,8 @@ export default function Layout({ children }: LayoutProps) {
         </div>
       </footer>
 
-      {/* Mobile Floating Cart Button */}
-      {getItemCount() > 0 && (
-        <div className="md:hidden">
-          <CartButton />
-        </div>
-      )}
+      {/* Floating Cart Button & Modal Drawer (Available on Mobile and Web) */}
+      <CartButton />
     </div>
   );
 }

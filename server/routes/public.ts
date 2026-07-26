@@ -365,7 +365,7 @@ router.get("/flutter/app-config", async (req, res) => {
   try {
     const settingKeys = [
       'splash_image_url', 'splash_image_url2', 'splash_title', 'splash_subtitle',
-      'splash_background_color', 'splash_duration', 'logo_url', 'app_name',
+      'splash_background_color', 'splash_duration', 'logo_url', 'app_name', 'app_subtitle',
       'primary_color', 'secondary_color', 'accent_color', 'store_status',
       'privacy_policy_text', 'show_splash_screen'
     ];

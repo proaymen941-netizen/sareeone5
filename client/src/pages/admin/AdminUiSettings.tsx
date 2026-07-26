@@ -554,6 +554,7 @@ export default function AdminUiSettings() {
             {/* الهوية البصرية */}
             <SectionCard {...secProps('branding')} title="الهوية البصرية والشعار" icon={ImageIcon} color="text-purple-600">
               <SettingRow label="اسم التطبيق" {...rowProps('app_name')} placeholder="السريع ون" description="الاسم الذي يظهر في الشريط العلوي" />
+              <SettingRow label="النص الفرعي أسفل اسم التطبيق" {...rowProps('app_subtitle')} placeholder="السريع ون" description="النص الصغير الذي يظهر أسفل اسم التطبيق في الهيدر والقائمة الجانبية" />
               <SettingRow label="إصدار التطبيق" {...rowProps('app_version')} placeholder="1.0.0" description="رقم إصدار التطبيق الظاهر في القائمة الجانبية" />
               <SettingRow label="اللون الأساسي (hex)" {...rowProps('app_theme')} placeholder="#16a34a" description="لون الموضوع الرئيسي" />
               <SettingRow label="شعار الشريط العلوي" {...rowProps('header_logo_url')} type="image" description="الشعار الصغير في أعلى التطبيق" />

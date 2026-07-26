@@ -55,7 +55,7 @@ export default function Favorites() {
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-5">
             {Array(10).fill(0).map((_, i) => (
               <div key={i} className="animate-pulse space-y-4">
                 <div className="aspect-[3/4] bg-gray-100 rounded-none" />
@@ -65,7 +65,7 @@ export default function Favorites() {
             ))}
           </div>
         ) : favoriteProducts && favoriteProducts.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-6 gap-y-10">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-5">
             {favoriteProducts.map((item) => {
               const store = stores?.find(s => s.id === item.restaurantId);
               return (

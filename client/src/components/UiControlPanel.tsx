@@ -130,6 +130,17 @@ export function UiControlPanel() {
             </div>
           </div>
           <div className="space-y-2">
+            <Label>النص الفرعي أسفل اسم التطبيق</Label>
+            <div className="flex gap-2">
+              <Input 
+                value={localSettings['app_subtitle'] || ''} 
+                onChange={(e) => handleInputChange('app_subtitle', e.target.value)}
+                placeholder="مثال: السريع ون"
+              />
+              <Button onClick={() => handleSaveSetting('app_subtitle')}>حفظ</Button>
+            </div>
+          </div>
+          <div className="space-y-2">
             <Label>رابط شعار الهيدر</Label>
             <div className="flex gap-2">
               <Input 

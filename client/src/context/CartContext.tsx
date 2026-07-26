@@ -264,6 +264,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         duration: 3000,
       });
     }
+
+    // إطلاق حدث إضافة عنصر للسلة لإظهار إشعار السلة ومؤشر السلة العائمة
+    window.dispatchEvent(new CustomEvent('cartItemAdded', { detail: { item, restaurantName } }));
   };
 
   const removeItem = (itemId: string) => {

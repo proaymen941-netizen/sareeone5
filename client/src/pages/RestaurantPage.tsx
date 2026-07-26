@@ -501,7 +501,7 @@ export default function RestaurantPage() {
       )}
 
       {/* ── Menu Items ── */}
-      <div className="px-3 pt-3 space-y-3">
+      <div className="px-3 pt-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {filteredItems.length === 0 && bundleOffers.length === 0 ? (
           <div className="text-center py-16">
             <UtensilsCrossed className="h-14 w-14 text-gray-200 mx-auto mb-3" />
