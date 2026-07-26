@@ -656,18 +656,28 @@ export default function AdminMenuItems() {
                       </AlertDialogTrigger>
                       <AlertDialogContent dir="rtl">
                         <AlertDialogHeader>
-                          <AlertDialogTitle>حذف المنتج</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            هل أنت متأكد من حذف منتج "{item.name}"؟ لا يمكن التراجع عن هذا الإجراء.
+                          <AlertDialogTitle>تأكيد حذف المنتج</AlertDialogTitle>
+                          <AlertDialogDescription className="space-y-2 text-right">
+                            <span>
+                              المنتج <strong>"{item.name}"</strong> {restaurants.find(r => r.id === item.restaurantId) ? `مرتبط بمتجر "${restaurants.find(r => r.id === item.restaurantId)?.name}"` : ''}.
+                            </span>
+                            <br /><br />
+                            <span className="text-sm text-slate-600 dark:text-slate-300 block">
+                              تنبيه: عند الموافقة، سيتم حذف هذا المنتج فقط بشكل نهائي وإزالته من القوائم دون إلحاق الضرر بالمتجر نفسه أو بالمنتجات الأخرى.
+                            </span>
+                            <br />
+                            <span className="font-semibold text-destructive text-sm block">
+                              هل أنت متأكد من موافقتك على حذف هذا المنتج؟
+                            </span>
                           </AlertDialogDescription>
                         </AlertDialogHeader>
-                        <AlertDialogFooter>
+                        <AlertDialogFooter className="gap-2">
                           <AlertDialogCancel>إلغاء</AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => deleteMenuItemMutation.mutate(item.id)}
-                            className="bg-destructive text-destructive-foreground"
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                           >
-                            حذف
+                            موافقة وحذف المنتج
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>

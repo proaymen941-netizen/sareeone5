@@ -37,7 +37,6 @@ export default function AdminRestaurants() {
     phone: '',
     deliveryTime: '',
     commissionRate: '10',
-    minimumOrder: '0',
     isOpen: true,
     categoryId: '',
     openingTime: '08:00',
@@ -61,6 +60,10 @@ export default function AdminRestaurants() {
 
   const { data: categories } = useQuery<Category[]>({
     queryKey: ['/api/admin/categories'],
+  });
+
+  const { data: allMenuItems = [] } = useQuery<MenuItem[]>({
+    queryKey: ['/api/admin/menu-items'],
   });
 
   const { data: restaurantSections = [], refetch: refetchSections } = useQuery<any[]>({
@@ -119,7 +122,6 @@ export default function AdminRestaurants() {
         deliveryFee: 0,
         perKmFee: 0,
         commissionRate: data.commissionRate ? parseFloat(data.commissionRate) : 10,
-        minimumOrder: parseFloat(data.minimumOrder) || 0,
         latitude: data.latitude ? parseFloat(data.latitude) : null,
         longitude: data.longitude ? parseFloat(data.longitude) : null,
         categoryId: data.categoryId || null,
@@ -151,7 +153,6 @@ export default function AdminRestaurants() {
       const submitData = {
         ...data,
         commissionRate: data.commissionRate != null && data.commissionRate !== '' ? parseFloat(data.commissionRate) : undefined,
-        minimumOrder: data.minimumOrder != null && data.minimumOrder !== '' ? parseFloat(data.minimumOrder) : undefined,
         latitude: data.latitude === '' || data.latitude == null ? null : parseFloat(data.latitude),
         longitude: data.longitude === '' || data.longitude == null ? null : parseFloat(data.longitude),
         categoryId: data.categoryId || null,
@@ -201,7 +202,6 @@ export default function AdminRestaurants() {
       phone: '',
       deliveryTime: '',
       commissionRate: '10',
-      minimumOrder: '0',
       isOpen: true,
       categoryId: '',
       openingTime: '08:00',
@@ -229,7 +229,6 @@ export default function AdminRestaurants() {
       image: restaurant.image || '',
       deliveryTime: restaurant.deliveryTime || '30-45 دقيقة',
       commissionRate: restaurant.commissionRate ? String(restaurant.commissionRate) : '10',
-      minimumOrder: restaurant.minimumOrder ? String(restaurant.minimumOrder) : '0',
       isOpen: restaurant.isOpen !== false,
       categoryId: restaurant.categoryId || '',
       openingTime: restaurant.openingTime || '08:00',
@@ -270,22 +269,12 @@ export default function AdminRestaurants() {
     }
 
     // Validate numeric fields
-    const minimumOrder = parseFloat(formData.minimumOrder);
     const commissionRate = parseFloat(formData.commissionRate);
 
     if (isNaN(commissionRate) || commissionRate < 0 || commissionRate > 100) {
       toast({
         title: "خطأ",
         description: "يرجى إدخال نسبة عمولة صحيحة (0-100)",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (isNaN(minimumOrder) || minimumOrder < 0) {
-      toast({
-        title: "خطأ",
-        description: "يرجى إدخال حد أدنى للطلب صحيح",
         variant: "destructive",
       });
       return;
@@ -530,19 +519,6 @@ export default function AdminRestaurants() {
                     value={formData.commissionRate}
                     onChange={(e) => setFormData(prev => ({ ...prev, commissionRate: e.target.value }))}
                     data-testid="input-restaurant-commission-rate"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="minimumOrder">الحد الأدنى للطلب (ريال)</Label>
-                  <Input
-                    id="minimumOrder"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={formData.minimumOrder}
-                    onChange={(e) => setFormData(prev => ({ ...prev, minimumOrder: e.target.value }))}
-                    data-testid="input-restaurant-minimum-order"
                   />
                 </div>
               </div>
@@ -997,9 +973,6 @@ export default function AdminRestaurants() {
                   <div className="text-xs text-muted-foreground">
                     توصيل: {parseDecimal(restaurant.deliveryFee)} ريال
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    أقل طلب: {parseDecimal(restaurant.minimumOrder)} ريال
-                  </div>
                   {restaurant.rating && (
                     <div className="flex items-center gap-1">
                       <Star className="h-4 w-4 text-yellow-500" />
@@ -1067,29 +1040,33 @@ export default function AdminRestaurants() {
                         حذف المتجر
                       </Button>
                     </AlertDialogTrigger>
-                    <AlertDialogContent>
+                    <AlertDialogContent dir="rtl">
                       <AlertDialogHeader>
-                        <AlertDialogTitle>تأكيد الحذف</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          هل أنت متأكد من حذف المتجر "{restaurant.name}" نهائياً؟
+                        <AlertDialogTitle>تأكيد حذف المتجر وبيناتة</AlertDialogTitle>
+                        <AlertDialogDescription className="space-y-2 text-right">
+                          <span>
+                            تنبيه: المتجر <strong>"{restaurant.name}"</strong> مرتبط حالياً بـ <strong>{allMenuItems.filter(i => i.restaurantId === restaurant.id).length} منتج/منتجات</strong> وبالأقسام والعروض والبيانات التابعة له.
+                          </span>
                           <br /><br />
-                          <strong className="text-red-600">تحذير:</strong> سيتم حذف:
-                          <ul className="list-disc list-inside mt-2 text-sm">
-                            <li>جميع منتجات المتجر</li>
-                            <li>جميع أقسام القائمة</li>
-                            <li>جميع البيانات المرتبطة</li>
+                          <strong className="text-red-600 block">سبب التأكيد ونطاق الحذف:</strong>
+                          <ul className="list-disc list-inside mt-1 text-sm space-y-1">
+                            <li>عند الموافقة، سيتم حذف المتجر نهائياً</li>
+                            <li>سيتم حذف جميع المنتجات المرتبطة به ({allMenuItems.filter(i => i.restaurantId === restaurant.id).length} منتج)</li>
+                            <li>سيتم حذف أقسام القائمة والعروض والتقييمات التابعة للمتجر</li>
                           </ul>
                           <br />
-                          هذا الإجراء لا يمكن التراجع عنه!
+                          <span className="font-semibold text-destructive text-sm block">
+                            هل توافق على حذف المتجر مع كافة بياناته ومنتجاته التابعة؟
+                          </span>
                         </AlertDialogDescription>
                       </AlertDialogHeader>
-                      <AlertDialogFooter>
+                      <AlertDialogFooter className="gap-2">
                         <AlertDialogCancel>إلغاء</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={() => deleteRestaurantMutation.mutate(restaurant.id)}
-                          className="bg-destructive hover:bg-destructive/90"
+                          className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
                         >
-                          حذف نهائياً
+                          موافقة وحذف المتجر ومنتجاته
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>

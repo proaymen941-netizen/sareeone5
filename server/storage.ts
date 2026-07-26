@@ -957,6 +957,11 @@ export class MemStorage implements IStorage {
   }
 
   async deleteRestaurant(id: string): Promise<boolean> {
+    for (const [mId, item] of this.menuItems.entries()) {
+      if (item.restaurantId === id) {
+        this.menuItems.delete(mId);
+      }
+    }
     return this.restaurants.delete(id);
   }
 
@@ -2043,10 +2048,32 @@ function createSmartStorage(): IStorage {
             try {
               return await dbMethod.apply(target, args);
             } catch (err: any) {
-              console.warn(`⚠️ DB query '${String(prop)}' failed (${err?.message || err}). Falling back to memory storage.`);
-              useDb = false;
-              if (typeof memMethod === 'function') {
-                return await memMethod.apply(mem, args);
+              const msg = (err?.message || '').toLowerCase();
+              const code = err?.code || '';
+              const isConnErr = (
+                code === 'ECONNREFUSED' ||
+                code === 'ENOTFOUND' ||
+                code === '57P01' || code === '57P02' || code === '57P03' ||
+                msg.includes('connection') ||
+                msg.includes('connect') ||
+                msg.includes('client has been closed')
+              );
+              
+              if (isConnErr) {
+                console.warn(`⚠️ DB connection lost in '${String(prop)}' (${err?.message}). Falling back to memory storage.`);
+                useDb = false;
+                if (typeof memMethod === 'function') {
+                  return await memMethod.apply(mem, args);
+                }
+              } else {
+                console.error(`❌ DB query '${String(prop)}' error:`, err?.message || err);
+                if (typeof memMethod === 'function') {
+                  try {
+                    const memResult = await memMethod.apply(mem, args);
+                    if (memResult !== undefined) return memResult;
+                  } catch (_) {}
+                }
+                throw err;
               }
             }
           }

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Save, X } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, Layers } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from '@/lib/queryClient';
 
 interface RestaurantSection {
   id: string;
@@ -17,10 +19,12 @@ interface Restaurant {
 }
 
 export default function RestaurantSections() {
+  const { toast } = useToast();
   const [sections, setSections] = useState<RestaurantSection[]>([]);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [selectedRestaurant, setSelectedRestaurant] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -36,19 +40,23 @@ export default function RestaurantSections() {
   useEffect(() => {
     if (selectedRestaurant) {
       fetchSections();
+    } else {
+      setSections([]);
     }
   }, [selectedRestaurant]);
 
   const fetchRestaurants = async () => {
     try {
-      const response = await fetch('/api/restaurants');
+      let response = await fetch('/api/admin/restaurants');
+      if (!response.ok) {
+        response = await fetch('/api/restaurants');
+      }
       const data = await response.json();
-      setRestaurants(data);
-      
-      // Auto-select Tamtom store
-      if (data.length > 0) {
-        const tamtomStore = data.find((r: any) => r.name.includes('السريع ون')) || data[0];
-        setSelectedRestaurant(tamtomStore.id);
+      if (Array.isArray(data)) {
+        setRestaurants(data);
+        if (data.length > 0) {
+          setSelectedRestaurant(data[0].id);
+        }
       }
     } catch (error) {
       console.error('خطأ في جلب المتاجر:', error);
@@ -60,9 +68,18 @@ export default function RestaurantSections() {
     
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/restaurants/${selectedRestaurant}/sections`);
-      const data = await response.json();
-      setSections(data);
+      const response = await fetch(`/api/admin/restaurants/${selectedRestaurant}/sections`);
+      if (response.ok) {
+        const data = await response.json();
+        setSections(Array.isArray(data) ? data : []);
+      } else {
+        // Fallback endpoint
+        const res2 = await fetch(`/api/restaurants/${selectedRestaurant}/sections`);
+        if (res2.ok) {
+          const data = await res2.json();
+          setSections(Array.isArray(data) ? data : []);
+        }
+      }
     } catch (error) {
       console.error('خطأ في جلب الأقسام:', error);
     } finally {
@@ -71,55 +88,116 @@ export default function RestaurantSections() {
   };
 
   const handleAdd = async () => {
-    if (!selectedRestaurant) return;
-    
-    try {
-      const response = await fetch(`/api/restaurants/${selectedRestaurant}/sections`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+    if (!selectedRestaurant) {
+      toast({
+        title: "خطأ",
+        description: "يرجى اختيار المتجر أولاً",
+        variant: "destructive",
       });
-      
-      if (response.ok) {
+      return;
+    }
+
+    if (!formData.name.trim()) {
+      toast({
+        title: "خطأ في الإدخال",
+        description: "يرجى إدخال اسم القسم",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsSubmitting(true);
+    try {
+      const res = await apiRequest('POST', '/api/admin/restaurant-sections', {
+        restaurantId: selectedRestaurant,
+        name: formData.name.trim(),
+        description: formData.description.trim() || undefined,
+        sortOrder: Number(formData.sortOrder) || 0,
+        isActive: true
+      });
+
+      if (res.ok) {
+        const newSec = await res.json();
+        toast({
+          title: "تم إضافة القسم بنجاح",
+          description: `تمت إضافة قسم "${newSec.name || formData.name}" بنجاح`,
+        });
         setFormData({ name: '', description: '', sortOrder: 0 });
         setShowAddForm(false);
         fetchSections();
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        toast({
+          title: "خطأ في إضافة القسم",
+          description: errData.error || errData.message || "فشل حفظ البيانات",
+          variant: "destructive",
+        });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('خطأ في إضافة القسم:', error);
+      toast({
+        title: "خطأ في الخادم",
+        description: "تعذر الاتصال بالخادم لإضافة القسم",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleUpdate = async (id: string, data: Partial<RestaurantSection>) => {
     try {
-      const response = await fetch(`/api/restaurant-sections/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
+      const res = await apiRequest('PUT', `/api/admin/restaurant-sections/${id}`, data);
       
-      if (response.ok) {
+      if (res.ok) {
+        toast({
+          title: "تم تحديث القسم بنجاح",
+        });
         setEditingId(null);
         fetchSections();
+      } else {
+        toast({
+          title: "خطأ",
+          description: "فشل في تحديث بيانات القسم",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error('خطأ في تحديث القسم:', error);
+      toast({
+        title: "خطأ",
+        description: "فشل في تحديث بيانات القسم",
+        variant: "destructive",
+      });
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('هل أنت متأكد من حذف هذا القسم؟')) return;
+  const handleDelete = async (id: string, sectionName: string) => {
+    if (!confirm(`هل أنت متأكد من حذف قسم "${sectionName}"؟`)) return;
     
     try {
-      const response = await fetch(`/api/restaurant-sections/${id}`, {
-        method: 'DELETE'
-      });
+      const res = await apiRequest('DELETE', `/api/admin/restaurant-sections/${id}`);
       
-      if (response.ok) {
+      if (res.ok) {
+        toast({
+          title: "تم حذف القسم بنجاح",
+          description: `تم إزالة قسم "${sectionName}"`,
+        });
         fetchSections();
+      } else {
+        toast({
+          title: "خطأ في الحذف",
+          description: "تعذر حذف هذا القسم",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error('خطأ في حذف القسم:', error);
+      toast({
+        title: "خطأ في الحذف",
+        description: "تعذر حذف هذا القسم",
+        variant: "destructive",
+      });
     }
   };
 
@@ -287,7 +365,7 @@ export default function RestaurantSections() {
                             <Edit2 size={16} />
                           </button>
                           <button
-                            onClick={() => handleDelete(section.id)}
+                            onClick={() => handleDelete(section.id, section.name)}
                             className="text-red-600 hover:text-red-900"
                           >
                             <Trash2 size={16} />

@@ -1,5 +1,6 @@
 
 export function coerceRequestData(data: any) {
+  if (!data || typeof data !== 'object') return data;
   const coerced = { ...data };
   
   // Convert decimal fields to strings (Zod expects strings for decimal fields)
@@ -21,7 +22,7 @@ export function coerceRequestData(data: any) {
   });
   
   // Convert integer fields properly
-  const intFields = ['reviewCount', 'discountPercent', 'sortOrder', 'quantity'];
+  const intFields = ['reviewCount', 'discountPercent', 'sortOrder', 'quantity', 'salesCount', 'completedOrders'];
   intFields.forEach(field => {
     if (coerced[field] !== undefined && coerced[field] !== null && coerced[field] !== '') {
       const parsed = parseInt(coerced[field]);
@@ -66,9 +67,21 @@ export function coerceRequestData(data: any) {
       coerced[field] = undefined;
     }
   });
+
+  // UUID validation regex (v4 or standard 36-char hex UUID)
+  const isUuid = (val: any) => typeof val === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
   
-  // Convert optional text/UUID fields to undefined instead of null
-  const optionalTextFields = ['categoryId', 'temporaryCloseReason', 'address', 'restaurantId', 'sectionId', 'menuItemId'];
+  // Convert optional text/UUID fields to undefined if empty or invalid UUID
+  const uuidFields = ['categoryId', 'restaurantId', 'sectionId', 'menuItemId', 'customerId', 'driverId'];
+  uuidFields.forEach(field => {
+    if (coerced[field] !== undefined) {
+      if (!coerced[field] || typeof coerced[field] !== 'string' || !isUuid(coerced[field])) {
+        coerced[field] = undefined;
+      }
+    }
+  });
+
+  const optionalTextFields = ['temporaryCloseReason', 'address', 'brand', 'sizes', 'colors'];
   optionalTextFields.forEach(field => {
     if (coerced[field] === null || coerced[field] === '') {
       coerced[field] = undefined;

@@ -372,15 +372,30 @@ export class DatabaseStorage {
   }
 
   async updateRestaurant(id: string, restaurant: Partial<InsertRestaurant>): Promise<Restaurant | undefined> {
-    const [updated] = await this.db.update(restaurants).set(restaurant).where(eq(restaurants.id, id)).returning();
+    const cleanData: any = { ...restaurant, updatedAt: new Date() };
+    if (cleanData.categoryId === '' || cleanData.categoryId === 'null' || cleanData.categoryId === 'undefined') {
+      cleanData.categoryId = null;
+    }
+    if (cleanData.temporaryCloseReason === '' || cleanData.temporaryCloseReason === 'null') {
+      cleanData.temporaryCloseReason = null;
+    }
+    const [updated] = await this.db.update(restaurants).set(cleanData).where(eq(restaurants.id, id)).returning();
     return updated;
   }
 
   async deleteRestaurant(id: string): Promise<boolean> {
     try {
-      // Set restaurantId to null in menuItems
-      await this.db.update(menuItems).set({ restaurantId: null }).where(eq(menuItems.restaurantId, id));
-      // Set restaurantId to null in orders
+      // Find all menuItems for this restaurant to delete dependent cart/favorites/specialOffers
+      const items = await this.db.select({ id: menuItems.id }).from(menuItems).where(eq(menuItems.restaurantId, id));
+      for (const item of items) {
+        await this.db.delete(cart).where(eq(cart.menuItemId, item.id));
+        await this.db.delete(favorites).where(eq(favorites.menuItemId, item.id));
+        await this.db.delete(specialOffers).where(eq(specialOffers.menuItemId, item.id));
+      }
+      // Delete all menu items belonging to this restaurant
+      await this.db.delete(menuItems).where(eq(menuItems.restaurantId, id));
+
+      // Set restaurantId to null in orders so order history is preserved
       await this.db.update(orders).set({ restaurantId: null }).where(eq(orders.restaurantId, id));
       // Delete restaurant sections
       await this.db.delete(restaurantSections).where(eq(restaurantSections.restaurantId, id));
@@ -423,6 +438,7 @@ export class DatabaseStorage {
   }
 
   async deleteRestaurantSection(id: string): Promise<boolean> {
+    await this.db.update(menuItems).set({ sectionId: null }).where(eq(menuItems.sectionId, id));
     const result = await this.db.delete(restaurantSections).where(eq(restaurantSections.id, id)).returning();
     return result.length > 0;
   }
@@ -449,7 +465,14 @@ export class DatabaseStorage {
   }
 
   async updateMenuItem(id: string, menuItem: Partial<InsertMenuItem>): Promise<MenuItem | undefined> {
-    const [updated] = await this.db.update(menuItems).set(menuItem).where(eq(menuItems.id, id)).returning();
+    const cleanData: any = { ...menuItem };
+    if (cleanData.restaurantId === '' || cleanData.restaurantId === 'null' || cleanData.restaurantId === 'undefined') {
+      cleanData.restaurantId = null;
+    }
+    if (cleanData.originalPrice === '' || cleanData.originalPrice === 'null') {
+      cleanData.originalPrice = null;
+    }
+    const [updated] = await this.db.update(menuItems).set(cleanData).where(eq(menuItems.id, id)).returning();
     return updated;
   }
 

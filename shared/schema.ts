@@ -631,6 +631,15 @@ export type InsertCategory = z.infer<typeof insertCategorySchema>;
 
 export const insertRestaurantSchema = createInsertSchema(restaurants).partial({
   id: true,
+  description: true,
+  phone: true,
+  image: true,
+  deliveryTime: true,
+  categoryId: true,
+  address: true,
+  latitude: true,
+  longitude: true,
+  temporaryCloseReason: true,
   createdAt: true,
   updatedAt: true,
   isActive: true,
@@ -654,16 +663,19 @@ export type InsertRestaurant = z.infer<typeof insertRestaurantSchema>;
 
 export const insertMenuItemSchema = createInsertSchema(menuItems).partial({
   id: true,
-  isAvailable: true,
-  isSpecialOffer: true,
+  description: true,
+  originalPrice: true,
   brand: true,
   sizes: true,
   colors: true,
   salesCount: true,
   rating: true,
   reviewCount: true,
+  isAvailable: true,
+  isSpecialOffer: true,
   isFeatured: true,
   isNew: true,
+  restaurantId: true,
 });
 export const selectMenuItemSchema = createSelectSchema(menuItems);
 export type MenuItem = z.infer<typeof selectMenuItemSchema>;
