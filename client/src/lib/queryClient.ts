@@ -120,10 +120,11 @@ export const queryClient = new QueryClient({
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,         // Disable auto-refetch by default (use WebSockets instead)
-      refetchOnWindowFocus: false,    // Disable refetch on window focus to reduce requests
+      refetchOnWindowFocus: true,     // Re-validate data when switching back to window
+      refetchOnReconnect: true,       // Re-validate data on reconnect
       // عرض الكاش فوراً عند العودة للصفحة (لا وميض). إذا كانت البيانات قديمة سيُجدّدها react-query بصمت في الخلفية.
       refetchOnMount: 'always',
-      staleTime: 2 * 60 * 1000,       // 2 minutes — most data is read-heavy and updated via WebSockets
+      staleTime: 10 * 1000,           // 10 seconds staleTime for rapid response
       gcTime: 60 * 60 * 1000,         // Keep in cache for 1 hour to prevent data disappearing on navigation between pages
       placeholderData: (prev: any) => prev, // أبقِ البيانات السابقة معروضة حتى تكتمل عملية التحديث الجديدة
       retry: (failureCount, error: any) => {

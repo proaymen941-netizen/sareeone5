@@ -3,6 +3,7 @@ import { storage } from "../storage.js";
 import { calculateDeliveryFee } from "../services/deliveryFeeService";
 import { formatCurrency } from "../../shared/utils";
 import { canOrderFromRestaurant } from "../../utils/restaurantHours";
+import { broadcastEvent } from "../broadcast.js";
 import { randomUUID } from "crypto";
 
 const router = express.Router();
@@ -344,6 +345,9 @@ router.post("/", async (req, res) => {
         createdBy: 'system',
         createdByType: 'system'
       });
+
+      // بث للعميل وللوحة التحكم ولتطبيق السائقين
+      broadcastEvent('new_order', { orderId: order.id, orderNumber: order.orderNumber, status: orderStatus });
     } catch (notificationError) {
       console.error('خطأ في إنشاء الإشعارات:', notificationError);
     }
